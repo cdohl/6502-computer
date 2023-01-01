@@ -238,7 +238,19 @@ lcd__instruction
       AND #E_C       ; Clear E bit
       STA PORTA
       RTS
-
+lcd_print_char
+      PHA
+      JSR lcd_wait
+      STA PORTB
+      LDA PORTA
+      AND #RSWE_C     ; Clear RS/RW/E bits
+      ORA #RS         ; set RS
+      ORA #E          ; set E bit
+      STA PORTA 
+      AND #E_C        ; clear E bit
+      STA PORTA
+      PLA
+      RTS
 
 LAB_vec
       .word ACIAin            ; byte in from simulated ACIA

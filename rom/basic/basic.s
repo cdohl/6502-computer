@@ -361,10 +361,10 @@ TK_BITSET         = TK_SWAP+1       ; BITSET token
 TK_BITCLR         = TK_BITSET+1     ; BITCLR token
 TK_IRQ            = TK_BITCLR+1     ; IRQ token
 TK_NMI            = TK_IRQ+1        ; NMI token
-
+TK_LPRINT         = TK_NMI+1        ; LPRINT token
 ; secondary command tokens, can't start a statement
 
-TK_TAB            = TK_NMI+1        ; TAB token
+TK_TAB            = TK_LPRINT+1        ; TAB token
 TK_ELSE           = TK_TAB+1        ; ELSE token
 TK_TO             = TK_ELSE+1       ; TO token
 TK_FN             = TK_TO+1         ; FN token
@@ -2169,6 +2169,21 @@ LAB_REM
 
 LAB_16FD
       JMP   LAB_SNER          ; do syntax error then warm start
+
+
+; perform LPRINT
+LAB_LPRINT
+      PHP
+      PHA
+      PHY
+      PHX
+      LDA #'W'
+      JSR lcd_print_char
+      PLX
+      PLY
+      PLA
+      PHP
+      RTS
 
 ; perform ON
 
@@ -8161,6 +8176,7 @@ LAB_CTBL
       .word LAB_BITCLR-1      ; BITCLR          new command
       .word LAB_IRQ-1         ; IRQ             new command
       .word LAB_NMI-1         ; NMI             new command
+      .word LAB_LPRINT-1      ; LPRINT          new command
 
 ; function pre process routine table
 
@@ -8480,6 +8496,9 @@ LBB_LOG
 LBB_LOOP
       .byte "OOP",TK_LOOP     ; LOOP
       .byte $00
+LBB_LPRINT
+      .byte "PRINT",TK_LPRINT ; LPRINT
+      .byte $00
 TAB_ASCM
 LBB_MAX
       .byte "AX(",TK_MAX      ; MAX(
@@ -8564,6 +8583,7 @@ LBB_STRS
 LBB_SWAP
       .byte "WAP",TK_SWAP     ; SWAP
       .byte $00
+ 
 TAB_ASCT
 LBB_TAB
       .byte "AB(",TK_TAB      ; TAB(
@@ -8696,6 +8716,8 @@ LAB_KEYT
       .word LBB_IRQ           ; IRQ
       .byte 3,'N'
       .word LBB_NMI           ; NMI
+      .byte 6,'L'
+      .word LBB_LPRINT        ; LPRINT
 
 ; secondary commands (can't start a statement)
 
