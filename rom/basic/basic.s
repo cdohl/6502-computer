@@ -469,7 +469,7 @@ Ibuffs            = VEC_SV+$16
 Ibuffe            = Ibuffs+$47; end of input buffer
 
 Ram_base          = $0300     ; start of user RAM (set as needed, should be page aligned)
-Ram_top           = $8000     ; end of user RAM+1 (set as needed, should be page aligned)
+Ram_top           = $4000     ; end of user RAM+1 (set as needed, should be page aligned)
 
 Stack_floor       = 16        ; bytes left free on stack for background interrupts
 
@@ -1011,8 +1011,8 @@ LAB_1357
       LDX   #$00              ; clear BASIC line buffer pointer
 LAB_1359
       JSR   V_INPT            ; call scan input device
-      BCC   LAB_1359          ; loop if no byte
-
+      BCC   LAB_1359          ; loop if no byte          
+      
       BEQ   LAB_1359          ; loop until valid input (ignore NULLs)
 
       CMP   #$07              ; compare with [BELL]
