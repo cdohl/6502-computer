@@ -311,7 +311,8 @@ IrqBase           = $DF       ; IRQ handler enabled/setup/triggered flags
 
 Decss             = $EF       ; number to decimal string start
 Decssp1           = Decss+1   ; number to decimal string start
-
+LPVPl             = $F0       ; Storage for output buffer (LPRINT)
+LPVPh             = $F0+1     
 ;                 = $FF       ; decimal string end
 
 ; token values needed for BASIC
@@ -2172,17 +2173,22 @@ LAB_16FD
 
 
 ; perform LPRINT
-LAB_LPRINT
-      PHP
-      PHA
-      PHY
-      PHX
-      LDA #'W'
-      JSR lcd_print_char
-      PLX
-      PLY
+LAB_LPRINT 
+      PHA                     ; store A
+      LDA    VEC_OUT          ; save output vector 
+      STA    LPVPl            ; to ZP, better move to $200+
+      LDA    VEC_OUT+1
+      STA    LPVPh
+      LDA    #<lcd_print_char  
+      STA    VEC_OUT      
+      LDA    #>lcd_print_char  
+      STA    VEC_OUT+1
       PLA
-      PHP
+      JSR    LAB_PRINT        ; call PRINT cmd
+      LDA    LPVPl            ; restore output vector
+      STA    VEC_OUT
+      LDA    LPVPh
+      STA    VEC_OUT+1
       RTS
 
 ; perform ON
@@ -8495,7 +8501,6 @@ LBB_LOG
       .byte "OG(",TK_LOG      ; LOG(
 LBB_LOOP
       .byte "OOP",TK_LOOP     ; LOOP
-      .byte $00
 LBB_LPRINT
       .byte "PRINT",TK_LPRINT ; LPRINT
       .byte $00

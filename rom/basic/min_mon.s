@@ -191,18 +191,19 @@ lcd_init
       
       LDA #(E|RW|RS|TX) ; set LCD and TX pins as PORTA output
       STA DDRA
-      
-      LDA #%00111000 ; set 8-bit mode 2 lines display
-      JSR lcd__instruction
 
+      LDA #%00111000 ; set 8-bit mode 2 lines display
+      JSR lcd_instruction
+lcd_clear    
       LDA #%00001110 ; display on; cursor on; no blink
-      JSR lcd__instruction
+      JSR lcd_instruction
 
       LDA #%00000110 ; increment and shift cursor; don't shift display
-      JSR lcd__instruction
+      JSR lcd_instruction
 
       LDA #%00000001 ; Clear Display
-      JSR lcd__instruction
+      JSR lcd_instruction
+      RTS
 
 lcd_wait
       PHA
@@ -227,7 +228,7 @@ lcdbusy
       PLA
       RTS
 
-lcd__instruction
+lcd_instruction
       JSR lcd_wait
       STA PORTB
       LDA PORTA
@@ -238,19 +239,32 @@ lcd__instruction
       AND #E_C       ; Clear E bit
       STA PORTA
       RTS
+
 lcd_print_char
       PHA
+      CMP #$20          ; Only print values >= " "
+      BCC lcd_no_print  ; non printable characters
       JSR lcd_wait
       STA PORTB
       LDA PORTA
-      AND #RSWE_C     ; Clear RS/RW/E bits
-      ORA #RS         ; set RS
-      ORA #E          ; set E bit
+      AND #RSWE_C       ; Clear RS/RW/E bits
+      ORA #RS           ; set RS
+      ORA #E            ; set E bit
       STA PORTA 
-      AND #E_C        ; clear E bit
+      AND #E_C          ; clear E bit
       STA PORTA
       PLA
       RTS
+lcd_no_print
+      CMP #$00          ; #00 clears the display
+      BEQ jmp_lcd_clear
+      PLA
+      RTS
+jmp_lcd_clear
+      JSR lcd_clear
+      PLA
+      RTS
+      
 
 LAB_vec
       .word ACIAin            ; byte in from simulated ACIA
@@ -295,4 +309,3 @@ LAB_mess
       .word IRQ_vec           ; IRQ vector
 
       .end RES_vec            ; set STArt at reset vector
-      
