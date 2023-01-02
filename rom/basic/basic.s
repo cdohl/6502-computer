@@ -311,8 +311,6 @@ IrqBase           = $DF       ; IRQ handler enabled/setup/triggered flags
 
 Decss             = $EF       ; number to decimal string start
 Decssp1           = Decss+1   ; number to decimal string start
-LPVPl             = $F0       ; Storage for output buffer (LPRINT)
-LPVPh             = $F0+1     
 ;                 = $FF       ; decimal string end
 
 ; token values needed for BASIC
@@ -458,6 +456,8 @@ VEC_IN            = VEC_CC+2  ; input vector
 VEC_OUT           = VEC_IN+2  ; output vector
 VEC_LD            = VEC_OUT+2 ; load vector
 VEC_SV            = VEC_LD+2  ; save vector
+VEC_OUTT          = VEC_SV+2  ; Storage for output buffer (LPRINT)
+  
 ; end bulk initialize by min_mon.asm from LAB_vec at LAB_stlp
 
 ; Ibuffs can now be anywhere in RAM, ensure that the max length is < $80,
@@ -465,7 +465,7 @@ VEC_SV            = VEC_LD+2  ; save vector
 ; program RAM pages!
 
 ;Ibuffs            = IRQ_vec+$14
-Ibuffs            = VEC_SV+$16
+Ibuffs            = VEC_OUTT+$14
                               ; start of input buffer after IRQ/NMI code
 Ibuffe            = Ibuffs+$47; end of input buffer
 
@@ -2176,18 +2176,18 @@ LAB_16FD
 LAB_LPRINT 
       PHA                     ; store A
       LDA    VEC_OUT          ; save output vector 
-      STA    LPVPl            ; to ZP, better move to $200+
+      STA    VEC_OUTT         ; to ZP, better move to $200+
       LDA    VEC_OUT+1
-      STA    LPVPh
+      STA    VEC_OUTT+1
       LDA    #<lcd_print_char  
       STA    VEC_OUT      
       LDA    #>lcd_print_char  
       STA    VEC_OUT+1
       PLA
       JSR    LAB_PRINT        ; call PRINT cmd
-      LDA    LPVPl            ; restore output vector
+      LDA    VEC_OUTT            ; restore output vector
       STA    VEC_OUT
-      LDA    LPVPh
+      LDA    VEC_OUTT+1
       STA    VEC_OUT+1
       RTS
 
