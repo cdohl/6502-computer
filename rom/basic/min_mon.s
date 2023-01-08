@@ -53,13 +53,22 @@ LAB_stlp
 
 ; now do the signon message, Y = $00 here
 
-LAB_signon
-      LDA   LAB_mess,Y        ; get byte from sign on message
-      BEQ   LAB_nokey         ; exit loop if done
+LAB_signon1
+      LDA   LAB_mess1,Y        ; get byte from sign on message
+      BEQ   LAB_signon2        ; exit loop if done
 
-      JSR   V_OUTP            ; output character
-      INY                     ; increment index
-      BNE   LAB_signon        ; loop, branch always
+      JSR   V_OUTP             ; output character
+      JSR   lcd_print_char
+      INY                      ; increment index
+      BNE   LAB_signon1        ; loop, branch always
+LAB_signon2
+      LDY   #0
+LAB_signon3
+      LDA   LAB_mess2,Y        ; get byte from sign on message
+      BEQ   LAB_nokey          ; exit loop if done
+      JSR   V_OUTP             ; output character
+      INY                      ; increment index
+      BNE   LAB_signon3        ; loop, branch always
 
 LAB_nokey
       JSR   V_INPT            ; call scan input device
@@ -296,8 +305,10 @@ NMI_CODE
 
 END_CODE
 
-LAB_mess
-      .byte $0D,$0A,"6502 EhBASIC  BE/CDO [C]old/[W]arm ?",$00
+LAB_mess1
+      .byte $0D,$0A,"6502 EhBASIC",$00
+LAB_mess2
+      .byte $0D,$0A,"[C]old/[W]arm ?",$00
                               ; sign on string
 
 ; system vectors
